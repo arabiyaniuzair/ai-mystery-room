@@ -8,7 +8,7 @@ Enter any small scenario, premise, or crime story (e.g. *"A billionaire dies at 
 - 🔍 **Forensic Evidence Photos**: Crime scene exhibits, autopsy notes, and physical swabs.
 - 👥 **Suspect Dossiers**: Motives, alibis, and direct accusation controls.
 - 🛡️ **"Detective Sentinel" Chatbot**: Resident AI assistant for gameplay rules, prompt inspiration, and technical questions with a strict anti-spoiler shield.
-- 👤 **Full Authentication & Stats**: Tracks cases played, cases solved, win rate, and detective ranks from *Rookie Detective* to *Chief Inspector*.
+- 👤 **User Authentication & Account Management**: Secure registration with auto-generated unique usernames, dual sign-in (email or username), salted bcrypt password hashing, session tokens, account security modal for passcode updates, and stats tracking (cases played, solved, and detective ranks from *Rookie Detective* to *Chief Inspector*).
 
 ---
 
@@ -77,6 +77,18 @@ cd frontend
 npm run dev
 ```
 Frontend will be accessible at: `http://localhost:5173`.
+
+---
+
+### 5. Running Automated Tests
+
+Run backend tests for Gemini key manager and user authentication:
+```bash
+cd backend
+npm test               # Runs all test suites (Gemini Rotation + Auth)
+npm run test:auth      # Runs User Authentication & Account Management tests
+npm run test:gemini    # Runs Gemini Key Manager & Key Rotation tests
+```
 
 ---
 

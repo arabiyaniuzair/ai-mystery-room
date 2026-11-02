@@ -28,8 +28,8 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Login form fields (USERNAME and PASSWORD only!)
-  const [loginUsername, setLoginUsername] = useState('');
+  // Login form fields (USERNAME OR EMAIL and PASSWORD)
+  const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
@@ -90,16 +90,16 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
     e.preventDefault();
     setError('');
 
-    const u = loginUsername.trim();
+    const id = loginIdentifier.trim();
     const p = loginPassword.trim();
 
     // Client check for both empty
-    if (!u && !p) {
+    if (!id && !p) {
       setError('Please enter valid login details.');
       return;
     }
-    if (!u) {
-      setError('Please enter a valid username.');
+    if (!id) {
+      setError('Please enter your username or registered email address.');
       return;
     }
     if (!p) {
@@ -110,14 +110,14 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
     setLoading(true);
 
     try {
-      await login(u, p);
+      await login(id, p);
       onClose();
     } catch (err) {
       const backendMsg = err.response?.data?.message;
       if (backendMsg) {
         setError(backendMsg);
       } else {
-        setError('Please enter valid login details.');
+        setError('Invalid username/email or password.');
       }
     } finally {
       setLoading(false);
@@ -184,8 +184,8 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               )}
             </div>
 
-            <div className="p-3 rounded-lg bg-amber-950/30 border border-amber-800/40 text-[11px] font-mono text-amber-300 text-left">
-              ⚠️ <strong>Important:</strong> Please write down or save your username <strong>{registeredUsername}</strong>. Login accepts username and password only!
+            <div className="p-3 rounded-lg bg-cyan-950/40 border border-cyan-800/50 text-[11px] font-mono text-cyan-300 text-left">
+              💡 <strong>Dual Login Enabled:</strong> You can sign in using either your generated codename <strong>{registeredUsername}</strong> or your registered email address <strong>{regEmail}</strong>!
             </div>
 
             <button
@@ -209,7 +209,7 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               </h2>
               <p className="text-xs text-slate-400 mt-1 font-mono">
                 {mode === 'login' 
-                  ? 'Enter your generated username and passcode to access your cases.'
+                  ? 'Enter your username or email address and passcode to access your cases.'
                   : 'Fill in your details. We will automatically generate your unique username!'}
               </p>
 
@@ -224,7 +224,7 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  Sign In (Username)
+                  Sign In
                 </button>
                 <button
                   type="button"
@@ -249,21 +249,21 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                 </div>
               )}
 
-              {/* LOGIN FORM: USERNAME AND PASSWORD ONLY! */}
+              {/* LOGIN FORM: USERNAME OR EMAIL AND PASSWORD */}
               {mode === 'login' ? (
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
-                      Investigator Username
+                      Username or Email Address
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                       <input
                         type="text"
                         required
-                        value={loginUsername}
-                        onChange={(e) => setLoginUsername(e.target.value)}
-                        placeholder="e.g. John_4821"
+                        value={loginIdentifier}
+                        onChange={(e) => setLoginIdentifier(e.target.value)}
+                        placeholder="e.g. John_4821 or john@example.com"
                         className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono"
                       />
                     </div>
@@ -305,7 +305,7 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                         <span>Verifying Credentials...</span>
                       </>
                     ) : (
-                      <span>Sign In with Username</span>
+                      <span>Sign In</span>
                     )}
                   </button>
                 </form>
