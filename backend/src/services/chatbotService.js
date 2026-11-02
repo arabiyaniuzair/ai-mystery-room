@@ -1,11 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
+import { geminiKeyManager } from './geminiKeyManager.js';
 
+// Backward-compatible Gemini client retriever
 const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey.trim() === '' || apiKey === 'YOUR_GEMINI_API_KEY') {
-    return null;
-  }
-  return new GoogleGenAI({ apiKey });
+  return geminiKeyManager.getActiveClient();
 };
 
 const buildSystemInstruction = (userContext) => {
@@ -171,9 +169,7 @@ export function getFallbackBotReply(userMessage, userContext = null) {
 }
 
 export async function askMysteryAssistant(userMessage, chatHistory = [], userContext = null) {
-  const ai = getGeminiClient();
-
-  if (!ai) {
+  if (!geminiKeyManager.hasKeys()) {
     return getFallbackBotReply(userMessage, userContext);
   }
 
@@ -186,12 +182,14 @@ export async function askMysteryAssistant(userMessage, chatHistory = [], userCon
     const systemInstruction = buildSystemInstruction(userContext);
     const prompt = `${systemInstruction}\n\nCONVERSATION HISTORY:\n${formattedHistory}\n\nUSER'S QUESTION:\n${userMessage}\n\nMYSTERY ASSISTANT'S DIRECT ANSWER:`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash-lite',
-      contents: prompt,
-      config: {
-        temperature: 0.4,
-      },
+    const response = await geminiKeyManager.executeWithKeyRotation(async (ai) => {
+      return await ai.models.generateContent({
+        model: 'gemini-3.5-flash-lite',
+        contents: prompt,
+        config: {
+          temperature: 0.4,
+        },
+      });
     });
 
     if (response && response.text) {

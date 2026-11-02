@@ -1,12 +1,9 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import { geminiKeyManager } from './geminiKeyManager.js';
 
-// Initialize Gemini client if API key is provided
+// Backward-compatible Gemini client retriever
 const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey.trim() === '' || apiKey === 'YOUR_GEMINI_API_KEY') {
-    return null;
-  }
-  return new GoogleGenAI({ apiKey });
+  return geminiKeyManager.getActiveClient();
 };
 
 // Strict JSON Schema for Mystery Generation
@@ -427,13 +424,11 @@ function generateProceduralMystery(scenarioPrompt, difficulty = 'medium') {
 }
 
 /**
- * Main Service Method: Generate Mystery using Gemini API with intelligent fallback
+ * Main Service Method: Generate Mystery using Gemini API with intelligent fallback and key rotation
  */
 export async function generateMysteryFromAI(scenarioPrompt, difficulty = 'medium') {
-  const ai = getGeminiClient();
-
-  if (!ai) {
-    console.info('[GeminiService] No GEMINI_API_KEY detected or mock mode active. Generating procedural mystery case.');
+  if (!geminiKeyManager.hasKeys()) {
+    console.info('[GeminiService] No Gemini API keys detected or mock mode active. Generating procedural mystery case.');
     return generateProceduralMystery(scenarioPrompt, difficulty);
   }
 
@@ -454,14 +449,16 @@ REQUIREMENTS:
 5. Provide a clear solutionExplanation detailing how the evidence proves the culprit guilty.
 `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash-lite',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseJsonSchema: mysteryResponseSchema,
-        temperature: 0.7,
-      },
+    const response = await geminiKeyManager.executeWithKeyRotation(async (ai) => {
+      return await ai.models.generateContent({
+        model: 'gemini-3.5-flash-lite',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseJsonSchema: mysteryResponseSchema,
+          temperature: 0.7,
+        },
+      });
     });
 
     if (response && response.text) {

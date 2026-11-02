@@ -5,6 +5,7 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import mysteryRoutes from './routes/mysteryRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
+import { geminiKeyManager } from './services/geminiKeyManager.js';
 
 // Load environment variables
 dotenv.config();
@@ -41,7 +42,8 @@ app.get('/api/health', (req, res) => {
     status: 'ONLINE',
     system: 'AI Mystery Room Forensic Mainframe',
     timestamp: new Date().toISOString(),
-    geminiConfigured: !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 5),
+    geminiConfigured: geminiKeyManager.hasKeys(),
+    geminiKeysCount: geminiKeyManager.getKeyCount(),
   });
 });
 

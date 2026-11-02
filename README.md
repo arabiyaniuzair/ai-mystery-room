@@ -31,10 +31,18 @@ PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/ai_mystery_room
 JWT_SECRET=super_secret_noir_detective_key_2026
 GEMINI_API_KEY=your_gemini_api_key_here
+
+# Optional: Configure additional Gemini API keys for automatic key rotation & quota failover
+GEMINI_API_KEY_1=your_second_gemini_key
+GEMINI_API_KEY_2=your_third_gemini_key
+GEMINI_API_KEY_3=your_fourth_gemini_key
+GEMINI_API_KEY_4=your_fifth_gemini_key
+# Alternatively: GEMINI_API_KEYS=key1,key2,key3,key4,key5
+
 CLIENT_URL=http://localhost:5173
 ```
 
-*(Note: If you run without a Gemini API Key, the system automatically falls back to its procedural mystery generation engine so you can test all screens immediately!)*
+*(Note: The system supports multiple Gemini API keys with automatic key rotation upon encountering `429 RESOURCE_EXHAUSTED` rate limits. If you run without any Gemini API Keys, the system automatically falls back to its procedural mystery generation engine so you can test all screens immediately!)*
 
 ---
 
