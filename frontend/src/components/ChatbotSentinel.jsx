@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { botAPI } from '../services/api';
 import { Shield, MessageCircle, X, Send, Loader2, BookOpen, Compass, Award } from 'lucide-react';
+import { ChatMessage } from './ChatMessage';
 
 const SUGGESTED_QUESTIONS = [
   'How do I play this website?',
@@ -131,32 +132,11 @@ export const ChatbotSentinel = ({ onOpenHowToPlay }) => {
           {/* Messages Feed */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#0B0F17]">
             {messages.map((msg, idx) => (
-              <div
+              <ChatMessage
                 key={idx}
-                className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-              >
-                <div
-                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-xs shadow-md ${
-                    msg.role === 'user'
-                      ? 'bg-cyan-600 text-black font-medium rounded-tr-none'
-                      : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none font-sans leading-relaxed'
-                  }`}
-                >
-                  <p className="whitespace-pre-line">{msg.text}</p>
-
-                  {/* Optional Quick Action Button to Open Field Guide */}
-                  {msg.showGuideButton && onOpenHowToPlay && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenHowToPlay()}
-                      className="mt-2.5 w-full py-1.5 px-3 rounded-lg bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:text-white hover:bg-cyan-900/60 font-mono text-[11px] font-bold flex items-center justify-center space-x-1.5 transition-all shadow-sm"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>Open Visual Field Guide</span>
-                    </button>
-                  )}
-                </div>
-              </div>
+                message={msg}
+                onOpenHowToPlay={onOpenHowToPlay}
+              />
             ))}
 
             {loading && (
