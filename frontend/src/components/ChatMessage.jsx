@@ -45,3 +45,4 @@ export const ChatMessage = ({ message, onOpenHowToPlay }) => {
 };
 
 export default ChatMessage;
+
