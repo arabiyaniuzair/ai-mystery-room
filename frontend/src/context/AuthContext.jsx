@@ -62,8 +62,13 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const login = async (username, password) => {
-    const res = await authAPI.login({ username, password });
+  const login = async (identifier, password) => {
+    const res = await authAPI.login({ 
+      identifier, 
+      username: identifier, 
+      email: identifier, 
+      password 
+    });
     const { token: newToken, user: userData } = res.data;
     try {
       sessionStorage.setItem('detective_token', newToken);
@@ -72,6 +77,11 @@ export const AuthProvider = ({ children }) => {
     }
     setToken(newToken);
     setUser(userData);
+    return res.data;
+  };
+
+  const changePassword = async (passwordData) => {
+    const res = await authAPI.changePassword(passwordData);
     return res.data;
   };
 
@@ -132,6 +142,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        changePassword,
         dismissWelcome,
         updateStats,
         isAuthenticated: !!user,

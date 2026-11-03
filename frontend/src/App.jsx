@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { AuthModal } from './components/AuthModal';
+import { AccountModal } from './components/AccountModal';
 import { CaseHistoryModal } from './components/CaseHistoryModal';
 import { ScoreHistoryModal } from './components/ScoreHistoryModal';
 import { HowToPlayModal } from './components/HowToPlayModal';
@@ -21,6 +22,7 @@ export function App() {
   const [activeCase, setActiveCase] = useState(null);
   const [loadingCase, setLoadingCase] = useState(false);
   const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [scoreHistoryOpen, setScoreHistoryOpen] = useState(false);
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
@@ -38,6 +40,7 @@ export function App() {
     setErrorMessage('');
     setScoreHistoryOpen(false);
     setHistoryModalOpen(false);
+    setAccountModalOpen(false);
     setAccusationModalOpen(false);
   }, [user?.id, user?.username]);
 
@@ -98,6 +101,7 @@ export function App() {
       {/* Navigation Bar */}
       <Navbar
         onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+        onOpenAccount={() => setAccountModalOpen(true)}
         onOpenHistory={() => setHistoryModalOpen(true)}
         onOpenScoreHistory={() => setScoreHistoryOpen(true)}
         onOpenHowToPlay={() => setHowToPlayOpen(true)}
@@ -172,6 +176,12 @@ export function App() {
         isOpen={authModal.isOpen}
         initialMode={authModal.mode}
         onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
+      />
+
+      {/* Account Management & Password Security Modal */}
+      <AccountModal
+        isOpen={accountModalOpen}
+        onClose={() => setAccountModalOpen(false)}
       />
 
       {/* Case Archives / History Modal */}

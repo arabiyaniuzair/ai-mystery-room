@@ -140,16 +140,23 @@ export const User = {
       return MongooseUserModel.findOne(query);
     }
     const users = readUsersFromFile();
-    const found = users.find((u) => {
-      if (query.email && u.email && u.email.toLowerCase() === query.email.toLowerCase()) return true;
-      if (query.username) {
-        if (query.username instanceof RegExp) {
-          return query.username.test(u.username);
+    const matchCondition = (cond, u) => {
+      if (cond.email && u.email && u.email.toLowerCase() === cond.email.toLowerCase()) return true;
+      if (cond.username) {
+        if (cond.username instanceof RegExp) {
+          return cond.username.test(u.username);
         }
-        return u.username.toLowerCase() === query.username.toLowerCase();
+        return u.username && u.username.toLowerCase() === cond.username.toLowerCase();
       }
-      if (query._id && u._id && u._id.toString() === query._id.toString()) return true;
+      if (cond._id && u._id && u._id.toString() === cond._id.toString()) return true;
       return false;
+    };
+
+    const found = users.find((u) => {
+      if (Array.isArray(query.$or)) {
+        return query.$or.some((cond) => matchCondition(cond, u));
+      }
+      return matchCondition(query, u);
     });
 
     if (!found) return null;

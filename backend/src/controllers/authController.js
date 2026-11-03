@@ -114,19 +114,20 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, identifier: rawIdentifier, password } = req.body;
 
-    const trimmedUsername = (username || '').trim();
+    // Allow identifier via username, email, or dedicated identifier field
+    const identifier = (username || email || rawIdentifier || '').trim();
     const trimmedPassword = (password || '').trim();
 
     // Check if both are empty/missing
-    if (!trimmedUsername && !trimmedPassword) {
+    if (!identifier && !trimmedPassword) {
       return res.status(400).json({ message: 'Please enter valid login details.' });
     }
 
-    // Check if username is missing
-    if (!trimmedUsername) {
-      return res.status(400).json({ message: 'Please enter a valid username.' });
+    // Check if username/email is missing
+    if (!identifier) {
+      return res.status(400).json({ message: 'Please enter a valid username or email address.' });
     }
 
     // Check if password is missing
@@ -134,19 +135,30 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'Please enter a valid password.' });
     }
 
-    // Lookup by username ONLY (case-insensitive regex)
-    const user = await User.findOne({ 
-      username: new RegExp(`^${trimmedUsername}$`, 'i') 
-    });
+    // Escape regex special characters to prevent regex injection
+    const escapedIdentifier = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const isEmail = identifier.includes('@');
+
+    // Lookup user by email OR username (case-insensitive)
+    const user = await User.findOne(
+      isEmail
+        ? { email: identifier.toLowerCase() }
+        : {
+            $or: [
+              { username: new RegExp(`^${escapedIdentifier}$`, 'i') },
+              { email: identifier.toLowerCase() },
+            ],
+          }
+    );
 
     if (!user) {
-      return res.status(401).json({ message: 'Please enter a valid username.' });
+      return res.status(401).json({ message: 'Invalid username/email or password.' });
     }
 
     // Verify bcrypt password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Please enter a valid password.' });
+      return res.status(401).json({ message: 'Invalid username/email or password.' });
     }
 
     // RESET SESSION POINTS TO ZERO AT EVERY NEW LOGIN!
@@ -333,5 +345,53 @@ export const getScoreHistory = async (req, res) => {
   } catch (err) {
     console.error('[AuthController] getScoreHistory error:', err);
     return res.status(500).json({ message: 'Failed to retrieve score history.' });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: 'Not authenticated.' });
+    }
+
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ 
+        message: 'Current password, new password, and confirm password are required.' 
+      });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ 
+        message: 'New password and confirm password do not match.' 
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        message: 'New password must be at least 6 characters long.' 
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    if (typeof user.save === 'function') {
+      await user.save();
+    }
+
+    return res.json({ 
+      success: true, 
+      message: 'Password updated successfully. Please use your new passcode on your next sign in.' 
+    });
+  } catch (err) {
+    console.error('[AuthController] changePassword error:', err);
+    return res.status(500).json({ message: 'Failed to update passcode.' });
   }
 };

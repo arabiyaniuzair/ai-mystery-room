@@ -26,6 +26,7 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
+  changePassword: (data) => api.post('/auth/change-password', data),
   getMe: () => api.get('/auth/me'),
   getScoreHistory: () => api.get('/auth/score-history'),
   dismissWelcome: () => api.post('/auth/dismiss-welcome'),

@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node src/services/geminiKeyManager.test.js"
+    "test": "node src/services/geminiKeyManager.test.js && node src/controllers/auth.test.js",
+    "test:auth": "node src/controllers/auth.test.js",
+    "test:gemini": "node src/services/geminiKeyManager.test.js"
   },
   "keywords": ["ai", "gemini", "mystery", "mern", "detective"],
   "author": "",

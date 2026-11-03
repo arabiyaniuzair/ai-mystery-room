@@ -10,7 +10,8 @@ import {
   HelpCircle, 
   BookOpen, 
   Trophy, 
-  TrendingUp 
+  TrendingUp,
+  KeyRound 
 } from 'lucide-react';
 
 export const Navbar = ({ 
@@ -18,6 +19,7 @@ export const Navbar = ({
   onOpenHistory, 
   onOpenScoreHistory, 
   onOpenHowToPlay, 
+  onOpenAccount,
   onResetCase, 
   isInvestigating 
 }) => {
@@ -158,6 +160,13 @@ export const Navbar = ({
                     >
                       <Trophy className="w-3.5 h-3.5 text-amber-400" />
                       <span>Score History Table</span>
+                    </button>
+                    <button
+                      onClick={onOpenAccount}
+                      className="w-full text-left px-4 py-2 text-slate-300 hover:bg-slate-800 flex items-center space-x-2"
+                    >
+                      <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Account & Security</span>
                     </button>
                     <button
                       onClick={onOpenHistory}
